@@ -74,8 +74,8 @@ class _CalorieState extends ConsumerState<Calorie> {
                   itemCount: foodItemData.length,
                   itemBuilder: (context, index){
                     final now = DateFormat('yyyy-MM-dd').format(DateTime.parse(DateTime.now().toString()));
-                    print(now);
-                    return now == foodItemData[index].dateTime  ?  Column(
+                    // print(now);
+                    return now != DateFormat('yyyy-MM-dd').format(DateTime.parse(foodItemData[index].dateTime)) ? Container() : Column(
                       children: [
                         ListTile(
                           contentPadding: EdgeInsets.only(left: 16, top: 0, bottom: 0, right: 4),
@@ -146,7 +146,8 @@ class _CalorieState extends ConsumerState<Calorie> {
                                                       final foodItems = FoodItem(
                                                           foodName: updateFoodNameController.text.trim(),
                                                           calorie: int.parse(updateCalorieController.text.trim()),
-                                                          dateTime: DateTime.now().toString());
+                                                          dateTime: DateFormat('yyyy-MM-dd').format(DateTime.parse(DateTime.now().toString()))
+                                                      );
                                                       final res = ref.read(foodItemProvider.notifier).update(index, foodItems);
                                                       if(res =='Updated'){
                                                         SnackShow.showSuccess(context, res);
@@ -178,7 +179,7 @@ class _CalorieState extends ConsumerState<Calorie> {
                           color: Colors.green.withOpacity(0.2),
                         )
                       ],
-                    ): Container();
+                    );
                   }),
             ),
           ),
@@ -252,26 +253,19 @@ class _CalorieState extends ConsumerState<Calorie> {
                                   _form.currentState!.save();
                                   FocusScope.of(context).unfocus();
                                   if(_form.currentState!.validate()){
+
+                                    // List<FoodItem> foodItems = [FoodItem(
+                                    //     foodName: foodNameController.text.trim(),
+                                    //     calorie: int.parse(calorieController.text.trim()),
+                                    //     dateTime: DateFormat('yyyy-MM-dd').format(DateTime.parse(DateTime.now().toString()))
+                                    // )];
+
                                     final foodItems = FoodItem(
                                         foodName: foodNameController.text.trim(),
                                         calorie: int.parse(calorieController.text.trim()),
                                         dateTime: DateFormat('yyyy-MM-dd').format(DateTime.parse(DateTime.now().toString()))
                                     );
-                                    final now = DateFormat('yyyy-MM-dd').format(DateTime.parse(DateTime.now().toString()));
-                                    final d =  DateFormat('yyyy-MM-dd').format(DateTime.parse(foodItemData.map((e) => e.dateTime).toString()));
-                                    print(d);
-                                    if(foodItemData.isNotEmpty &&
-                                    now == d
-                                    ){
-                                      final c = TotalCalorie(totalCalorie: totalCalorie+ int.parse(calorieController.text.toString()),
-                                          dateTime: DateFormat('yyyy-MM-dd').format(DateTime.parse(DateTime.now().toString()))
-                                      );
-                                      ref.read(totalCalorieProvider.notifier).totalCalorieUpdate(0, c);
 
-                                    }else{
-                                      final c = TotalCalorie(totalCalorie: totalCalorie, dateTime: DateTime.now().toString());
-                                      ref.read(totalCalorieProvider.notifier).addCalorie(c);
-                                    }
 
                                     final res = ref.read(foodItemProvider.notifier).add(foodItems);
                                     if(res=='Success'){

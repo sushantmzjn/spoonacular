@@ -2,6 +2,8 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
+import 'package:intl/intl.dart';
+import 'package:spoonacular/model/calorie.dart';
 import 'package:spoonacular/model/food_item.dart';
 import '../main.dart';
 
@@ -13,11 +15,7 @@ class FoodItemProvider extends StateNotifier<List<FoodItem>>{
 
   //add food items
 String add(FoodItem foodItem){
-  final newFoodItem = FoodItem(
-      foodName: foodItem.foodName,
-      calorie: foodItem.calorie,
-      dateTime: foodItem.dateTime
-  );
+  final newFoodItem = FoodItem(foodName: foodItem.foodName, calorie: foodItem.calorie, dateTime: foodItem.dateTime);
   final box = Hive.box<FoodItem>('foodItem').add(newFoodItem);
   state = [...state, newFoodItem];
   return 'Success';
@@ -40,7 +38,10 @@ String update(int index,FoodItem updateFoodItem){
   int get total{
     int total = 0;
     for(final foodItem in state){
+      // print(foodItem.dateTime);
+      if(DateFormat('yyyy-MM-dd').format(DateTime.parse(DateTime.now().toString())) == foodItem.dateTime){
       total += foodItem.calorie;
+      }
     }
     return total;
   }

@@ -37,7 +37,7 @@ void main() async{
       box1.overrideWithValue(foodItemBox.values.toList()),
       box2.overrideWithValue(totalCalorieBox.values.toList())
     ],
-      child:  MyApp()));
+      child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {

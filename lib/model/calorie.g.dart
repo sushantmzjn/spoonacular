@@ -19,17 +19,20 @@ class TotalCalorieAdapter extends TypeAdapter<TotalCalorie> {
     return TotalCalorie(
       totalCalorie: fields[0] as int,
       dateTime: fields[1] as String,
+      foodItem: (fields[2] as List).cast<FoodItem>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, TotalCalorie obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(3)
       ..writeByte(0)
       ..write(obj.totalCalorie)
       ..writeByte(1)
-      ..write(obj.dateTime);
+      ..write(obj.dateTime)
+      ..writeByte(2)
+      ..write(obj.foodItem);
   }
 
   @override

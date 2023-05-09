@@ -9,17 +9,21 @@ class TotalCalorie extends HiveObject {
   int totalCalorie;
   @HiveField(1)
   String dateTime;
+  @HiveField(2)
+  List<FoodItem> foodItem;
 
 
   TotalCalorie({
     required this.totalCalorie,
-    required this.dateTime
+    required this.dateTime,
+    required this.foodItem
   });
 
   factory TotalCalorie.fromJson(Map<String, dynamic>json){
     return TotalCalorie(
         totalCalorie: json['totalCalorie']??'',
         dateTime: json['dateTime']??'',
+        foodItem: json['foodItem']??'',
     );
   }
 }

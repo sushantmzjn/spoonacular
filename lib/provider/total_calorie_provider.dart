@@ -16,7 +16,7 @@ class TotalCalorieProvider extends StateNotifier<List<TotalCalorie>>{
 void addCalorie(TotalCalorie calorie){
   final newTotalCalorie = TotalCalorie(
       totalCalorie: calorie.totalCalorie,
-      dateTime: calorie.dateTime
+      dateTime: calorie.dateTime, foodItem: []
   );
   final box = Hive.box<TotalCalorie>('totalCalorie').add(newTotalCalorie);
   state = [...state, newTotalCalorie];
@@ -27,7 +27,7 @@ void totalCalorieUpdate(int index,TotalCalorie updateTotalCalorie){
   state[index] = updateTotalCalorie;
   final updateTotal = TotalCalorie(
       totalCalorie: updateTotalCalorie.totalCalorie,
-      dateTime: updateTotalCalorie.dateTime
+      dateTime: updateTotalCalorie.dateTime, foodItem: []
   );
   final box= Hive.box<TotalCalorie>('totalCalorie').put(index, updateTotal);
   state=[...state];

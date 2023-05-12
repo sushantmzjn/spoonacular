@@ -35,10 +35,11 @@ class _CalorieState extends ConsumerState<Calorie> {
   Widget build(BuildContext context) {
     final mode = ref.watch(autoValidateMode);
     final foodItemData = ref.watch(foodItemProvider);
+
     final calorie = ref.watch(totalCalorieProvider);
-    print(calorie.length);
-    final totalCalorie = ref.watch(foodItemProvider.notifier).total;
     print(foodItemData.length);
+    final totalCalorie = ref.watch(foodItemProvider.notifier).total;
+    // print(calorie.length);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Calorie Track', style: TextStyle(letterSpacing: 1),),
@@ -74,17 +75,27 @@ class _CalorieState extends ConsumerState<Calorie> {
                   itemCount: foodItemData.length,
                   itemBuilder: (context, index){
                     final now = DateFormat('yyyy-MM-dd').format(DateTime.parse(DateTime.now().toString()));
-                    // print(now);
+
+                    final mealItems = foodItemData[index].foodItem;
+                   final name = mealItems.map((e) => e.foodName).toList();
+                   final calorie = mealItems.map((e) => e.calorie).toList();
+                   final date = mealItems.map((e) => e.dateTime).toList();
                     return now != DateFormat('yyyy-MM-dd').format(DateTime.parse(foodItemData[index].dateTime)) ? Container() : Column(
                       children: [
                         ListTile(
                           contentPadding: EdgeInsets.only(left: 16, top: 0, bottom: 0, right: 4),
-                          title: Text(foodItemData[index].foodName),
-                          subtitle: Text(foodItemData[index].dateTime),
+                          title: Row(
+                            children: [
+                              Text(name.join(', ')),
+                              // Text(foodItemData[index].totalCalorie.toString()),
+                              // Text(foodItemData[index].dateTime),
+                            ],
+                          ),
+                          subtitle: Text(date.join(', ')),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(foodItemData[index].calorie.toString()),
+                              Text(calorie.join(', ')),
                               SizedBox(width: 5.w,),
                               VerticalDivider(
                                 thickness: 1,
@@ -111,29 +122,29 @@ class _CalorieState extends ConsumerState<Calorie> {
                                                   crossAxisAlignment: CrossAxisAlignment.center,
                                                   mainAxisAlignment: MainAxisAlignment.center,
                                                   children: [
-                                                    CustomTextFormField(
-                                                      controller: updateFoodNameController..text = foodItemData[index].foodName,
-                                                      keyboardType: TextInputType.text,
-                                                      labelText: 'Food',
-                                                      validator: (val){
-                                                        if(val!.trim().isEmpty){
-                                                          return 'required';
-                                                        }
-                                                        return null;
-                                                      },
-                                                    ),
+                                                    // CustomTextFormField(
+                                                    //   controller: updateFoodNameController..text = foodItemData[index].foodName,
+                                                    //   keyboardType: TextInputType.text,
+                                                    //   labelText: 'Food',
+                                                    //   validator: (val){
+                                                    //     if(val!.trim().isEmpty){
+                                                    //       return 'required';
+                                                    //     }
+                                                    //     return null;
+                                                    //   },
+                                                    // ),
                                                     SizedBox(height: 8.h,),
-                                                    CustomTextFormField(
-                                                      controller: updateCalorieController..text = foodItemData[index].calorie.toString(),
-                                                      keyboardType: TextInputType.number,
-                                                      labelText: 'Calorie',
-                                                      validator: (val){
-                                                        if(val!.trim().isEmpty){
-                                                          return 'required';
-                                                        }
-                                                        return null;
-                                                      },
-                                                    ),
+                                                    // CustomTextFormField(
+                                                    //   controller: updateCalorieController..text = foodItemData[index].calorie.toString(),
+                                                    //   keyboardType: TextInputType.number,
+                                                    //   labelText: 'Calorie',
+                                                    //   validator: (val){
+                                                    //     if(val!.trim().isEmpty){
+                                                    //       return 'required';
+                                                    //     }
+                                                    //     return null;
+                                                    //   },
+                                                    // ),
                                                   ],
                                                 ),
                                               ),
@@ -148,13 +159,13 @@ class _CalorieState extends ConsumerState<Calorie> {
                                                           calorie: int.parse(updateCalorieController.text.trim()),
                                                           dateTime: DateFormat('yyyy-MM-dd').format(DateTime.parse(DateTime.now().toString()))
                                                       );
-                                                      final res = ref.read(foodItemProvider.notifier).update(index, foodItems);
-                                                      if(res =='Updated'){
-                                                        SnackShow.showSuccess(context, res);
-                                                        Navigator.of(context).pop();
-                                                        foodNameController.clear();
-                                                        calorieController.clear();
-                                                      }
+                                                      // final res = ref.read(foodItemProvider.notifier).update(index, foodItems);
+                                                      // if(res =='Updated'){
+                                                      //   SnackShow.showSuccess(context, res);
+                                                      //   Navigator.of(context).pop();
+                                                      //   foodNameController.clear();
+                                                      //   calorieController.clear();
+                                                      // }
                                                     }else{
                                                       ref.read(autoValidateMode.notifier).autoValidate();
                                                     }
@@ -183,19 +194,21 @@ class _CalorieState extends ConsumerState<Calorie> {
                   }),
             ),
           ),
+
           Container(
-            height: 250,
+            color: Colors.red,
+            height: 200,
             child: ListView.builder(
-                itemCount: calorie.length,
+                itemCount: foodItemData.length,
                 itemBuilder: (context, index){
-                  return Column(
-                    children: [
-                      Text(calorie[index].totalCalorie.toString()),
-                      Text(calorie[index].dateTime.toString()),
-                    ],
-                  );
+                  return Column(children: [
+                    Text(foodItemData[index].dateTime),
+                    Text(totalCalorie.toString()),
+                  ],);
+
             }),
           )
+
         ],
       ),
 
@@ -254,26 +267,32 @@ class _CalorieState extends ConsumerState<Calorie> {
                                   FocusScope.of(context).unfocus();
                                   if(_form.currentState!.validate()){
 
-                                    // List<FoodItem> foodItems = [FoodItem(
-                                    //     foodName: foodNameController.text.trim(),
-                                    //     calorie: int.parse(calorieController.text.trim()),
-                                    //     dateTime: DateFormat('yyyy-MM-dd').format(DateTime.parse(DateTime.now().toString()))
-                                    // )];
-
-                                    final foodItems = FoodItem(
+                                    List<FoodItem> foodItems = [
+                                      ...foodItemData[0].foodItem,
+                                      FoodItem(
                                         foodName: foodNameController.text.trim(),
                                         calorie: int.parse(calorieController.text.trim()),
                                         dateTime: DateFormat('yyyy-MM-dd').format(DateTime.parse(DateTime.now().toString()))
-                                    );
+                                    )];
+
+                                    // final foodItems = FoodItem(
+                                    //     foodName: foodNameController.text.trim(),
+                                    //     calorie: int.parse(calorieController.text.trim()),
+                                    //     dateTime: DateFormat('yyyy-MM-dd').format(DateTime.parse(DateTime.now().toString()))
+                                    // );
+
+                                      final res = ref.read(foodItemProvider.notifier).add(TotalCalorie(
+                                          totalCalorie: totalCalorie + int.parse(calorieController.text),
+                                          dateTime: DateFormat('yyyy-MM-dd').format(DateTime.parse(DateTime.now().toString())),
+                                          foodItem: foodItems));
 
 
-                                    final res = ref.read(foodItemProvider.notifier).add(foodItems);
-                                    if(res=='Success'){
-                                      SnackShow.showSuccess(context, res);
+                                    // if(res=='Success'){
+                                    //   SnackShow.showSuccess(context, res);
                                       Navigator.of(context).pop();
                                       foodNameController.clear();
                                       calorieController.clear();
-                                    }
+                                    // }
                                   }else{
                                     ref.read(autoValidateMode.notifier).autoValidate();
                                   }

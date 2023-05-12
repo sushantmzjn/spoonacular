@@ -31,6 +31,7 @@ void main() async{
   final favouriteBox = await Hive.openBox<Favourite>('favourite');
   final foodItemBox = await Hive.openBox<FoodItem>('foodItem');
   final totalCalorieBox = await Hive.openBox<TotalCalorie>('totalCalorie');
+  // print(totalCalorieBox.isEmpty);
   runApp(ProviderScope(
     overrides: [
       box.overrideWithValue(favouriteBox.values.toList()),

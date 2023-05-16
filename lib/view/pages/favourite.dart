@@ -66,11 +66,17 @@ class Favourite extends ConsumerWidget {
                                   child: Text(favData[index].title, textAlign: TextAlign.center,
                                     style: TextStyle(fontSize: 16.sp)),
                                 ),
-                                IconButton(
-                                    onPressed: (){
-                                      ref.read(favouriteProvider.notifier).remove(favData[index]);
-                                    },
-                                    icon: Icon(Icons.delete,color: Colors.red,))
+                                Material(
+                                  color: Colors.transparent,
+                                  shape: const CircleBorder(),
+                                  clipBehavior: Clip.hardEdge,
+                                  child: IconButton(
+                                      splashColor: Colors.green,
+                                      onPressed: (){
+                                        ref.read(favouriteProvider.notifier).remove(favData[index]);
+                                      },
+                                      icon: Icon(Icons.delete,color: Colors.red,)),
+                                )
                               ],
                             ),
                           )

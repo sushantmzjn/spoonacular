@@ -7,7 +7,6 @@ import 'package:get/get.dart';
 import 'package:spoonacular/provider/favourite_provider.dart';
 import 'package:spoonacular/services/recipe_services.dart';
 import 'package:spoonacular/view/common_widget/snackbar.dart';
-
 import '../detail_page.dart';
 
 class Home extends ConsumerWidget {
@@ -55,64 +54,72 @@ class Home extends ConsumerWidget {
                         child: ListView.builder(
                             padding: EdgeInsets.zero,
                             physics: NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
+                            shrinkWrap: true,
                             itemCount: data.length,
                             itemBuilder: (context, index){
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 8.0),
-                              child: Stack(
-                                children: [
-                                  GestureDetector(
-                                    onTap: (){
-                                      Get.to(()=> Detail(recipe: data[index]), transition: Transition.leftToRightWithFade);
-                                    },
-                                    child: Container(
-                                      alignment: Alignment.center,
-                                      width: MediaQuery.of(context).size.width,
-                                      height: 150.h,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(8.0),
-                                        boxShadow: [
-                                          BoxShadow(
-                                              color: Colors.grey.withOpacity(0.5),
-                                              spreadRadius: 3,
-                                              blurRadius: 3,
-                                              offset: Offset(3, 3))
-                                        ],
-                                        image: DecorationImage(
-                                          image: NetworkImage(data[index].image,),
-                                          fit: BoxFit.fitWidth,
-                                        )
+                              // final fav = Hive.box<Favourite>('favourite').get(index);
+                              // print(fav);
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 8.0),
+                                child: Stack(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: (){
+                                        Get.to(()=> Detail(recipe: data[index]), transition: Transition.leftToRightWithFade);
+                                      },
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        width: MediaQuery.of(context).size.width,
+                                        height: 150.h,
+                                        decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(8.0),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                  color: Colors.grey.withOpacity(0.5),
+                                                  spreadRadius: 3,
+                                                  blurRadius: 3,
+                                                  offset: Offset(3, 3))
+                                            ],
+                                            image: DecorationImage(
+                                              image: NetworkImage(data[index].image,),
+                                              fit: BoxFit.fitWidth,
+                                            )
+                                        ),
+                                        child: Text(data[index].title, textAlign: TextAlign.center,
+                                          style: TextStyle(fontSize: 16.sp,
+                                              color: Colors.white,
+                                              backgroundColor: Colors.black.withOpacity(0.1),
+                                              letterSpacing: 1,
+                                              fontWeight: FontWeight.w700
+                                          ),),
                                       ),
-                                      child: Text(data[index].title,textAlign: TextAlign.center,
-                                        style: TextStyle(fontSize: 16.sp,
-                                          color: Colors.white,
-                                          backgroundColor: Colors.black.withOpacity(0.1),
-                                          letterSpacing: 1,
-                                          fontWeight: FontWeight.w700
-                                        ),),
                                     ),
-                                  ),
-                                  Align(
+                                    Align(
                                       alignment: Alignment.bottomRight,
-                                      child: IconButton(
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        shape: const CircleBorder(),
+                                        clipBehavior: Clip.hardEdge,
+                                        child: IconButton(
                                           onPressed: (){
                                             final res = ref.read(favouriteProvider.notifier).add(data[index]);
-                                            if(res == 'Already Added to Favourite'){
-                                              SnackShow.showFailure(context, res);
-                                            }else{
+                                            if(res == 'Added to Favourite'){
                                               SnackShow.showSuccess(context, res);
-                                            }
-                                          },
-                                          icon: Icon(CupertinoIcons.heart_fill, size: 28,
-                                          color: favId== data[index].id ? Colors.red : Colors.black,
-                                          )),
-                                  )
-                                ],
-                              ),
-                            );
-                        }),
+                                            }else{
+                                              SnackShow.showFailure(context, res);
+                                            }},
+                                          icon: Icon(CupertinoIcons.heart_circle, size: 28,
+                                            color: favId.contains(data[index].id) ? Colors.red : Colors.black,
+                                          ),
+                                          splashColor: Colors.green,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }),
                       );
                     },
                     error: (error, stack)=> Center(child: Text(error.toString()),),

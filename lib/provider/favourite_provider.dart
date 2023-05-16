@@ -46,7 +46,8 @@ String add(Recipe recipe){
 void remove(Favourite favourite){
   favourite.delete();
   state.remove(favourite);
-  state = [...state];
+  state = state.where((element) => element != favourite).toList();
+  // state = [...state];
 }
 
 }

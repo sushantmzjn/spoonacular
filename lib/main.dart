@@ -4,18 +4,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:spoonacular/model/calorie.dart';
-import 'package:spoonacular/model/food_item.dart';
 import 'package:spoonacular/view/dashboard_page.dart';
 
 import 'model/favourite.dart';
+import 'model/meal model/meal.dart';
+import 'model/total calorie model/calorie.dart';
 
 //favourite box
 final box = Provider<List<Favourite>>((ref) => []);
-//foodItem box
-final box1 = Provider<List<FoodItem>>((ref) => []);
-//total calorie box
-final box2 = Provider<List<TotalCalorie>>((ref) => []);
+//calorie box
+final box1 = Provider<List<TotalCalorie>>((ref) => []);
+//meal box
+final box2 = Provider<List<Meal>>((ref) => []);
+
 
 
 void main() async{
@@ -26,17 +27,18 @@ void main() async{
   ));
   await Hive.initFlutter();
   Hive.registerAdapter(FavouriteAdapter());
-  Hive.registerAdapter(FoodItemAdapter());
   Hive.registerAdapter(TotalCalorieAdapter());
+  Hive.registerAdapter(MealAdapter());
   final favouriteBox = await Hive.openBox<Favourite>('favourite');
-  final foodItemBox = await Hive.openBox<FoodItem>('foodItem');
-  final totalCalorieBox = await Hive.openBox<TotalCalorie>('totalCalorie');
+  final calorieBox =await Hive.openBox<TotalCalorie>('total_calorie');
+  final mealBox =await Hive.openBox<Meal>('meal');
+
   // print(totalCalorieBox.isEmpty);
   runApp(ProviderScope(
     overrides: [
       box.overrideWithValue(favouriteBox.values.toList()),
-      box1.overrideWithValue(foodItemBox.values.toList()),
-      box2.overrideWithValue(totalCalorieBox.values.toList())
+      box1.overrideWithValue(calorieBox.values.toList()),
+      box2.overrideWithValue(mealBox.values.toList()),
     ],
       child: MyApp()));
 }

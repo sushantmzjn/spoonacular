@@ -19,7 +19,7 @@ class TotalCalorieAdapter extends TypeAdapter<TotalCalorie> {
     return TotalCalorie(
       totalCalorie: fields[0] as int,
       dateTime: fields[1] as String,
-      foodItem: (fields[2] as List).cast<FoodItem>(),
+      meal: (fields[2] as List).cast<Meal>(),
     );
   }
 
@@ -32,7 +32,7 @@ class TotalCalorieAdapter extends TypeAdapter<TotalCalorie> {
       ..writeByte(1)
       ..write(obj.dateTime)
       ..writeByte(2)
-      ..write(obj.foodItem);
+      ..write(obj.meal);
   }
 
   @override

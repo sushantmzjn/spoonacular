@@ -1,315 +1,240 @@
 import 'package:animations/animations.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-import 'package:spoonacular/model/food_item.dart';
-import 'package:spoonacular/model/calorie.dart';
-import 'package:spoonacular/provider/total_calorie_provider.dart';
-import 'package:spoonacular/view/common_widget/custom_textform.dart';
 import 'package:spoonacular/view/common_widget/snackbar.dart';
-
+import '../../model/meal model/meal.dart';
+import '../../model/total calorie model/calorie.dart';
 import '../../provider/autoValidate_provider.dart';
-import '../../provider/food_item_provider.dart';
+import '../../provider/calorie_provider.dart';
+import 'package:fl_chart/fl_chart.dart';
+import '../common_widget/calorie_alert_dialog.dart';
 
-class Calorie extends ConsumerStatefulWidget {
-  const Calorie({Key? key}) : super(key: key);
+class Calorie extends ConsumerWidget {
 
-  @override
-  ConsumerState<Calorie> createState() => _CalorieState();
-}
-
-class _CalorieState extends ConsumerState<Calorie> {
-
-  TextEditingController foodNameController = TextEditingController();
-  TextEditingController calorieController = TextEditingController();
-  TextEditingController updateFoodNameController = TextEditingController();
-  TextEditingController updateCalorieController = TextEditingController();
-
+  TextEditingController mealController =  TextEditingController();
+  TextEditingController calorieController =  TextEditingController();
   final _form = GlobalKey<FormState>();
 
 
   @override
-  Widget build(BuildContext context) {
-    final mode = ref.watch(autoValidateMode);
-    final foodItemData = ref.watch(foodItemProvider);
+  Widget build(BuildContext context, ref) {
 
-    final calorie = ref.watch(totalCalorieProvider);
-    print(foodItemData.length);
-    final totalCalorie = ref.watch(foodItemProvider.notifier).total;
-    // print(calorie.length);
-    return Scaffold(
+    final mealData = ref.watch(calorieAddProvider);
+    final mode = ref.watch(autoValidateMode);
+
+    final totalCaloriesByDate = ref.watch(calorieAddProvider.notifier).calculateTotalCaloriesByDate();
+    print(totalCaloriesByDate);
+
+
+
+    return  Scaffold(
       appBar: AppBar(
-        title: const Text('Calorie Track', style: TextStyle(letterSpacing: 1),),
+        title: Text('Calorie', style: TextStyle(letterSpacing: 1), ),
         centerTitle: true,
         elevation: 0,
         systemOverlayStyle: const SystemUiOverlayStyle(
           statusBarIconBrightness: Brightness.dark
         ),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-            child: Row(
-              children: [
-                Text('Total Calorie Intake :', style: TextStyle(fontSize: 16.sp),),
-                Spacer(),
-                Text(totalCalorie.toString(), style: TextStyle(fontSize: 16.sp),),
-                Spacer()
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: Container(
-              height: 250.h,
-              decoration: BoxDecoration(
-                color: const Color(0xffefefef),
-                borderRadius: BorderRadius.circular(10.0),
-                border: Border.all(color: Colors.green.withOpacity(0.5))
-              ),
-              child: ListView.builder(
-                  itemCount: foodItemData.length,
-                  itemBuilder: (context, index){
-                    final now = DateFormat('yyyy-MM-dd').format(DateTime.parse(DateTime.now().toString()));
-
-                    final mealItems = foodItemData[index].foodItem;
-                   final name = mealItems.map((e) => e.foodName).toList();
-                   final calorie = mealItems.map((e) => e.calorie).toList();
-                   final date = mealItems.map((e) => e.dateTime).toList();
-                    return now != DateFormat('yyyy-MM-dd').format(DateTime.parse(foodItemData[index].dateTime)) ? Container() : Column(
-                      children: [
-                        ListTile(
-                          contentPadding: EdgeInsets.only(left: 16, top: 0, bottom: 0, right: 4),
-                          title: Row(
-                            children: [
-                              Text(name.join(', ')),
-                              // Text(foodItemData[index].totalCalorie.toString()),
-                              // Text(foodItemData[index].dateTime),
-                            ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 300.h,
+                child: mealData.isEmpty ? Center(child: Text('Your Calorie List  is Empty')) : ListView.builder(
+                    itemCount: mealData.length,
+                    itemBuilder: (context, index){
+                      final now = DateFormat('yyyy-MM-dd').format(DateTime.parse(DateTime.now().toString()));
+                      return  now != DateFormat('yyyy-MM-dd').format(DateTime.parse(mealData[index].dateTime))
+                          ? Container() : Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Text('Date : ${mealData[index].dateTime}', style: TextStyle(fontSize: 16.sp),),
+                                Text('Total Calorie : ${mealData[index].totalCalorie.toString()}', style: TextStyle(fontSize: 16.sp)),
+                              ],
+                            ),
                           ),
-                          subtitle: Text(date.join(', ')),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(calorie.join(', ')),
-                              SizedBox(width: 5.w,),
-                              VerticalDivider(
-                                thickness: 1,
-                                color: Colors.green.withOpacity(0.4),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                            child: Container(
+                              height: 250.h,
+                              decoration: BoxDecoration(
+                                color: Color(0xffefefef),
+                                borderRadius: BorderRadius.circular(12.0),
+                                border: Border.all(color: Colors.green)
                               ),
-                              IconButton(onPressed: ()async{
-                              await showModal(
-                                    configuration: const FadeScaleTransitionConfiguration(
-                                        transitionDuration: Duration(milliseconds: 400)
-                                    ),
-                                    context: context, builder: (builder){
-                                  return StatefulBuilder(
-                                      builder: (BuildContext context, StateSetter setState){
-                                        return AlertDialog(
-                                          contentPadding: EdgeInsets.all(8.0),
-                                          title: Center(child: Text('Update')),
-                                          content: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Form(
-                                                key: _form,
-                                                autovalidateMode: mode,
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    // CustomTextFormField(
-                                                    //   controller: updateFoodNameController..text = foodItemData[index].foodName,
-                                                    //   keyboardType: TextInputType.text,
-                                                    //   labelText: 'Food',
-                                                    //   validator: (val){
-                                                    //     if(val!.trim().isEmpty){
-                                                    //       return 'required';
-                                                    //     }
-                                                    //     return null;
-                                                    //   },
-                                                    // ),
-                                                    SizedBox(height: 8.h,),
-                                                    // CustomTextFormField(
-                                                    //   controller: updateCalorieController..text = foodItemData[index].calorie.toString(),
-                                                    //   keyboardType: TextInputType.number,
-                                                    //   labelText: 'Calorie',
-                                                    //   validator: (val){
-                                                    //     if(val!.trim().isEmpty){
-                                                    //       return 'required';
-                                                    //     }
-                                                    //     return null;
-                                                    //   },
-                                                    // ),
-                                                  ],
-                                                ),
-                                              ),
-                                              SizedBox(height: 12.h,),
-                                              ElevatedButton(
-                                                  onPressed: (){
-                                                    _form.currentState!.save();
-                                                    FocusScope.of(context).unfocus();
-                                                    if(_form.currentState!.validate()){
-                                                      final foodItems = FoodItem(
-                                                          foodName: updateFoodNameController.text.trim(),
-                                                          calorie: int.parse(updateCalorieController.text.trim()),
-                                                          dateTime: DateFormat('yyyy-MM-dd').format(DateTime.parse(DateTime.now().toString()))
-                                                      );
-                                                      // final res = ref.read(foodItemProvider.notifier).update(index, foodItems);
-                                                      // if(res =='Updated'){
-                                                      //   SnackShow.showSuccess(context, res);
-                                                      //   Navigator.of(context).pop();
-                                                      //   foodNameController.clear();
-                                                      //   calorieController.clear();
-                                                      // }
-                                                    }else{
-                                                      ref.read(autoValidateMode.notifier).autoValidate();
-                                                    }
-                                                  },
-                                                  style: ElevatedButton.styleFrom(
-                                                      minimumSize: Size(double.infinity, 35.0)
-                                                  ),
-                                                  child: Text('Update',style: TextStyle(fontSize: 14.sp),))
-                                            ],
-                                          ),
-                                        );
-                                      });
-                                });
-                              },
-                                  icon: Icon(Icons.edit,color: Colors.green,))
-                            ],
-                          ),
-                        ),
-                        Divider(
-                          thickness: 1,
-                          height: 0,
-                          color: Colors.green.withOpacity(0.2),
-                        )
-                      ],
-                    );
-                  }),
-            ),
+                              child: ListView.builder(
+                                  itemCount: mealData[index].meal.length,
+                                  itemBuilder: (context,position){
+                                    return Column(
+                                      children: [
+                                        ListTile(
+                                          title: Text(mealData[index].meal[position].name),
+                                          subtitle: Text(mealData[index].meal[position].dateTime),
+                                          trailing: Text(mealData[index].meal[position].calorie.toString()),
+                                          contentPadding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 0),
+                                        ),
+                                        Divider(
+                                          color: Colors.green.withOpacity(0.5),
+                                          height: 0,)
+                                      ],
+                                    );
+
+
+                              }),
+                            ),
+                          )
+                        ],
+                      );
+                }),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 18.0),
+                  alignment: Alignment.centerLeft,
+                  child: Text('Daily Calorie Intake', style: TextStyle(fontSize: 14.sp),)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Container(
+                  height: 220.h,
+                  width: 230.w,
+                  decoration: BoxDecoration(
+                  color: Color(0xffefefef),
+                    border: Border.all(color: Colors.green),
+                    borderRadius: BorderRadius.circular(12.0)
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Text('Date', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),),
+                          SizedBox(width: 35.w,),
+                          Text('Total Calorie', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      Divider(color: Colors.green,),
+                      Flexible(
+                        child: ListView.builder(
+                            itemCount: mealData.length,
+                            itemBuilder: (context, i){
+                              return Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: [
+                                      Text(mealData[i].dateTime),
+                                      SizedBox(width: 35.w,),
+                                      Text(mealData[i].totalCalorie.toString()),
+                                    ],
+                                  ),
+                                  Divider(color: Colors.green,)
+                                ],
+                              );
+
+                        }),
+                      )
+                    ],
+                  ),
+                ),
+              )
+            ],
           ),
-
-          Container(
-            color: Colors.red,
-            height: 200,
-            child: ListView.builder(
-                itemCount: foodItemData.length,
-                itemBuilder: (context, index){
-                  return Column(children: [
-                    Text(foodItemData[index].dateTime),
-                    Text(totalCalorie.toString()),
-                  ],);
-
-            }),
-          )
-
-        ],
+        )
       ),
 
+
+
+      //---------------FAB-----------------------------------------------------------------------------------------------------
       floatingActionButton: FloatingActionButton(
+        elevation: 0,
+        mini: true,
+        shape: BeveledRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            side: const BorderSide(color: Colors.white, width: 0.5,)
+        ),
         onPressed: ()async{
           await showModal(
             configuration: const FadeScaleTransitionConfiguration(
-              transitionDuration: Duration(milliseconds: 400)
+                transitionDuration: Duration(milliseconds: 400)
             ),
-              context: context, builder: (builder){
-                return StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState){
-                      return AlertDialog(
-                        contentPadding: EdgeInsets.all(8.0),
-                        title: Center(child: Text('Add Meal')),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Form(
-                              key: _form,
-                              autovalidateMode: mode,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  CustomTextFormField(
-                                    controller: foodNameController,
-                                    keyboardType: TextInputType.text,
-                                    labelText: 'Food',
-                                    validator: (val){
-                                      if(val!.trim().isEmpty){
-                                        return 'required';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  SizedBox(height: 8.h,),
-                                  CustomTextFormField(
-                                    controller: calorieController,
-                                    keyboardType: TextInputType.number,
-                                    labelText: 'Calorie',
-                                    validator: (val){
-                                      if(val!.trim().isEmpty){
-                                        return 'required';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(height: 12.h,),
-                            ElevatedButton(
-                                onPressed: (){
-                                  _form.currentState!.save();
-                                  FocusScope.of(context).unfocus();
-                                  if(_form.currentState!.validate()){
+            context: context,
+            builder: (BuildContext context) {
+              return StatefulBuilder(
+                builder: (BuildContext context, void Function(void Function()) setState) {
+                  return Form(
+                    key: _form,
+                    autovalidateMode: mode,
+                    child: CalorieAlertDialog(
+                      mealController: mealController,
+                      calorieController: calorieController,
+                      mealKeyboardType: TextInputType.text,
+                      calorieKeyboardType: TextInputType.number,
+                      mealLabelText: 'Meal',
+                      calorieLabelText: 'Calorie',
+                      mealValidator: (val){
+                        if(val!.isEmpty){
+                          return 'required';
+                        }
+                      },
+                      calorieValidator: (val){
+                        if(val!.isEmpty){
+                          return 'required';
+                        }
+                      },
+                      onPressed: (){
+                        _form.currentState!.save();
+                        FocusScope.of(context).unfocus();
+                        if(_form.currentState!.validate()){
 
-                                    List<FoodItem> foodItems = [
-                                      ...foodItemData[0].foodItem,
-                                      FoodItem(
-                                        foodName: foodNameController.text.trim(),
-                                        calorie: int.parse(calorieController.text.trim()),
-                                        dateTime: DateFormat('yyyy-MM-dd').format(DateTime.parse(DateTime.now().toString()))
-                                    )];
+                          final meal = [
+                            Meal(
+                                name: mealController.text,
+                                calorie: int.parse(calorieController.text),
+                                dateTime: DateFormat('yyyy-MM-dd').format(DateTime.parse(DateTime.now().toString()))
+                            )
+                          ];
 
-                                    // final foodItems = FoodItem(
-                                    //     foodName: foodNameController.text.trim(),
-                                    //     calorie: int.parse(calorieController.text.trim()),
-                                    //     dateTime: DateFormat('yyyy-MM-dd').format(DateTime.parse(DateTime.now().toString()))
-                                    // );
+                         final response = ref.read(calorieAddProvider.notifier).add(TotalCalorie(
+                              totalCalorie: 0 + int.parse(calorieController.text),
+                              dateTime: DateFormat('yyyy-MM-dd').format(DateTime.parse(DateTime.now().toString())),
+                              meal: meal
+                          ));
 
-                                      final res = ref.read(foodItemProvider.notifier).add(TotalCalorie(
-                                          totalCalorie: totalCalorie + int.parse(calorieController.text),
-                                          dateTime: DateFormat('yyyy-MM-dd').format(DateTime.parse(DateTime.now().toString())),
-                                          foodItem: foodItems));
+                          if( response == 'Success' ){
+                            SnackShow.showSuccess(context, response);
+                          }else if(response == 'meal added'){
+                            SnackShow.showSuccess(context, response);
+                          }
+                          Navigator.of(context).pop();
+                          mealController.clear();
+                          calorieController.clear();
+                        }else{
+                          ref.read(autoValidateMode.notifier).autoValidate();
+                        }
+                      },
+                    ),
+                  );
+                },
+              );
+            },
 
-
-                                    // if(res=='Success'){
-                                    //   SnackShow.showSuccess(context, res);
-                                      Navigator.of(context).pop();
-                                      foodNameController.clear();
-                                      calorieController.clear();
-                                    // }
-                                  }else{
-                                    ref.read(autoValidateMode.notifier).autoValidate();
-                                  }
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  minimumSize: Size(double.infinity, 35.0)
-                                ),
-                                child: Text('Submit',style: TextStyle(fontSize: 14.sp),))
-                          ],
-                        ),
-                      );
-                    });
-          });
+          );
         },
-        mini: true,
         child: Icon(Icons.add),
+
       ),
     );
   }
 }
+
+
+

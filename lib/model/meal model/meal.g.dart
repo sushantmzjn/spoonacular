@@ -1,34 +1,34 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'food_item.dart';
+part of 'meal.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class FoodItemAdapter extends TypeAdapter<FoodItem> {
+class MealAdapter extends TypeAdapter<Meal> {
   @override
   final int typeId = 0;
 
   @override
-  FoodItem read(BinaryReader reader) {
+  Meal read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return FoodItem(
-      foodName: fields[0] as String,
+    return Meal(
+      name: fields[0] as String,
       calorie: fields[1] as int,
       dateTime: fields[2] as String,
     );
   }
 
   @override
-  void write(BinaryWriter writer, FoodItem obj) {
+  void write(BinaryWriter writer, Meal obj) {
     writer
       ..writeByte(3)
       ..writeByte(0)
-      ..write(obj.foodName)
+      ..write(obj.name)
       ..writeByte(1)
       ..write(obj.calorie)
       ..writeByte(2)
@@ -41,7 +41,7 @@ class FoodItemAdapter extends TypeAdapter<FoodItem> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is FoodItemAdapter &&
+      other is MealAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

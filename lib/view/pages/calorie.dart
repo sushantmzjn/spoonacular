@@ -26,8 +26,6 @@ class Calorie extends ConsumerWidget {
     final mode = ref.watch(autoValidateMode);
 
     final totalCaloriesByDate = ref.watch(calorieAddProvider.notifier).calculateTotalCaloriesByDate();
-    print(totalCaloriesByDate);
-
 
 
     return  Scaffold(
@@ -100,7 +98,7 @@ class Calorie extends ConsumerWidget {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 18.0),
                   alignment: Alignment.centerLeft,
-                  child: Text('Daily Calorie Intake', style: TextStyle(fontSize: 14.sp),)),
+                  child: Text('Daily Calorie Intake', style: TextStyle(fontSize: 15.sp, letterSpacing: 0.5),)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Container(

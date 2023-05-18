@@ -14,39 +14,70 @@ final calorieAddProvider =  StateNotifierProvider<CalorieProvider, List<TotalCal
 class CalorieProvider  extends StateNotifier<List<TotalCalorie>>{
   CalorieProvider(super.state);
 
-  // add calorie/meal
-// String add(TotalCalorie totalCalorie){
-//   final newAdd = TotalCalorie(
-//   totalCalorie: totalCalorie.totalCalorie,
-//   dateTime: totalCalorie.dateTime,
-//   meal: totalCalorie.meal);
-//   final box = Hive.box<TotalCalorie>('total_calorie').add(newAdd);
-//   state = [...state, newAdd];
-//   return 'added';
-// }
 
+  // String add(TotalCalorie totalCalorie) {
+  //   if (state.isNotEmpty) {
+  //     final lastTotalCalorie = state.last;
+  //
+  //     if (lastTotalCalorie.dateTime == totalCalorie.dateTime) {
+  //       // Add meal to the existing TotalCalorie object
+  //       final newMealList = [...lastTotalCalorie.meal, ...totalCalorie.meal];
+  //
+  //       final updatedTotalCalorie = TotalCalorie(
+  //         totalCalorie: lastTotalCalorie.totalCalorie + totalCalorie.totalCalorie,
+  //         dateTime: lastTotalCalorie.dateTime,
+  //         meal: newMealList,
+  //       );
+  //
+  //       final box = Hive.box<TotalCalorie>('total_calorie');
+  //       box.putAt(state.length - 1, updatedTotalCalorie);
+  //
+  //       state = [...state]..[state.length - 1] = updatedTotalCalorie;
+  //       // state = [...state];
+  //       print('meal added');
+  //       return 'meal added';
+  //     }
+  //   }
+  //
+  //   // Create a new TotalCalorie object
+  //   final newTotalCalorie = TotalCalorie(
+  //     totalCalorie: totalCalorie.totalCalorie,
+  //     dateTime: totalCalorie.dateTime,
+  //     meal: totalCalorie.meal,
+  //   );
+  //
+  //   final box = Hive.box<TotalCalorie>('total_calorie');
+  //   box.add(newTotalCalorie);
+  //   state = [...state, newTotalCalorie];
+  //
+  //   return 'Success';
+  // }
+
+//total calories calculate
+
+  //add meals
   String add(TotalCalorie totalCalorie) {
-    if (state.isNotEmpty) {
-      final lastTotalCalorie = state.last;
+    final matchingIndex = state.indexWhere((entry) => entry.dateTime == totalCalorie.dateTime);
+    // print(matchingIndex);
 
-      if (lastTotalCalorie.dateTime == totalCalorie.dateTime) {
-        // Add meal to the existing TotalCalorie object
-        final newMealList = [...lastTotalCalorie.meal, ...totalCalorie.meal];
+    if (matchingIndex != -1) {
+      // Add meal to the existing TotalCalorie object
+      final existingTotalCalorie = state[matchingIndex];
+      final newMealList = [...existingTotalCalorie.meal, ...totalCalorie.meal];
 
-        final updatedTotalCalorie = TotalCalorie(
-          totalCalorie: lastTotalCalorie.totalCalorie + totalCalorie.totalCalorie,
-          dateTime: lastTotalCalorie.dateTime,
-          meal: newMealList,
-        );
+      final updatedTotalCalorie = TotalCalorie(
+        totalCalorie: existingTotalCalorie.totalCalorie + totalCalorie.totalCalorie,
+        dateTime: existingTotalCalorie.dateTime,
+        meal: newMealList,
+      );
 
-        final box = Hive.box<TotalCalorie>('total_calorie');
-        box.putAt(state.length - 1, updatedTotalCalorie);
+      final box = Hive.box<TotalCalorie>('total_calorie');
+      box.putAt(matchingIndex, updatedTotalCalorie);
 
-        state = [...state]..[state.length - 1] = updatedTotalCalorie;
-        // state = [...state];
-        print('meal added');
-        return 'meal added';
-      }
+      state = [...state]..[matchingIndex] = updatedTotalCalorie;
+
+      print('Meal added');
+      return 'meal added';
     }
 
     // Create a new TotalCalorie object
@@ -63,7 +94,10 @@ class CalorieProvider  extends StateNotifier<List<TotalCalorie>>{
     return 'Success';
   }
 
-//total calories calculate
+
+
+
+
   Map<String, int> calculateTotalCaloriesByDate() {
     final Map<String, int> totalCaloriesByDate = {};
 
